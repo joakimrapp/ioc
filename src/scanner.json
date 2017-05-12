@@ -1,0 +1,20 @@
+{
+  "codefile": {
+    ".js": true
+  },
+  "jsonfile": {
+    ".json": true
+  },
+  "parent": {
+    ".js": true,
+    ".parent": true,
+    ".container": true
+  },
+  "lifestyle": {
+    ".transient": "transient"
+  },
+  "ignore": {
+    ".ignore": true,
+    ".exclude": true
+  }
+}

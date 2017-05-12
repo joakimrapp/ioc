@@ -1,0 +1,33 @@
+{
+  "name": "@jrapp/ioc",
+  "version": "1.0.0",
+  "description": "Finds files recursively with a wildcarded pattern",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter spec --colors --timeout 10000 --async-only --recursive ./test/tests",
+    "coverage": "./node_modules/istanbul/lib/cli.js cover --config ./test/istanbul/test.yml ./node_modules/.bin/_mocha -- --recursive ./test/tests --timeout 10000 --async-only --reporter xunit --reporter-options output=./ci/reports/coverage/test.xml",
+    "coverage-report": "./node_modules/istanbul/lib/cli.js report --config ./test/istanbul/report.yml --root ci/reports/coverage --include coverage.json",
+    "lint": "./node_modules/.bin/eslint ./src",
+    "test-report": "npm -s run lint && npm -s run test && npm -s run coverage && npm -s run coverage-report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com:joakimrapp/ioc.git"
+  },
+  "author": "Joakim J. Rapp",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joakimrapp/ioc/issues"
+  },
+  "homepage": "https://github.com/joakimrapp/ioc#readme",
+  "devDependencies": {
+    "eslint": "3.19.0",
+    "istanbul": "0.4.5",
+    "mocha": "3.3.0"
+  },
+  "dependencies": {
+    "@jrapp/log-emitter": "*",
+    "@jrapp/callbacks-to-promises": "*",
+    "stack-trace": "0.0.9"
+  }
+}
