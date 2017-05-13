@@ -1,0 +1,9 @@
+reporting:
+  dir: ./ci/reports/coverage
+  reports:
+    - html
+    - cobertura
+    - json-summary
+  report-config:
+    json-summary: { file: ./coverage-summary.json }
+    cobertura: { file: ./cobertura-coverage.xml }

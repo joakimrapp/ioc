@@ -26,8 +26,9 @@
     "mocha": "3.3.0"
   },
   "dependencies": {
+    "@jrapp/callbacks-to-promises": "^1.0.0",
     "@jrapp/log-emitter": "*",
-    "@jrapp/callbacks-to-promises": "*",
+    "parse-function": "^4.0.3",
     "stack-trace": "0.0.9"
   }
 }

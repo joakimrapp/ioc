@@ -1,0 +1,9 @@
+instrumentation:
+  root: ./src
+  include-all-sources: true
+reporting:
+  dir: ./ci/reports/coverage
+  reports:
+    - json
+  report-config:
+    json: {file: coverage.json}

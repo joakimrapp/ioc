@@ -1,50 +1,37 @@
 const path = require( 'path' );
-const logEmitter = require( '../../log-emitter' );
-const log = logEmitter( 'ioc' );
+const logEmitter = require( '@jrapp/log-emitter' );
+const log = logEmitter.log( 'ioc' );
 class Component {
 	constructor( container, parent, { name, required, relativepath, dependencies, children, resolved, lifestyle }, basepath ) {
 		Object.assign( this, { parent, name, dependencies, required, resolved, lifestyle, container, containers: [],
 			waiting: [], displayName: parent ? `${parent.name || 'anonymous' }.${name || 'anonymous'}` : name || 'anonymous' } );
 		if( name )
 			container.set( name, this );
-		let componentType;
-		if( resolved !== undefined ) {
-			componentType = 'resolved';
-			this.resolve = this.resolveResolved;
-		}
+		if( resolved !== undefined )
+			Object.assign( this, { componentType: 'resolved', resolve: this.resolveResolved } );
 		else {
 			if( ( required === undefined ) && ( relativepath ) )
 				this.required = require( path.resolve( basepath, relativepath ) );
 			if( children ) {
 				this.containers.push( children.reduce( ( container, child ) =>
 					( new Component( container, this, child, basepath ) ).container, new Map() ) );
-				if( dependencies )
-					componentType = 'injectable with children';
-				else {
-					componentType = 'instance with children';
-					this.dependencies = children.map( child => child.name );
-				}
-				this.resolve = this.inject;
+				Object.assign( this, dependencies ? { componentType: 'injectable with children', resolve: this.inject } :
+			 		{ componentType: 'instance with children', dependencies: children.map( child => child.name ), resolve: this.inject } );
 			}
-			else if( dependencies ) {
-				componentType = 'injectable';
-				this.resolve = this.inject;
-			}
-			else {
-				componentType = 'instance';
-				this.resolved = this.required;
-				this.resolve = this.resolveResolved;
-			}
+			else if( dependencies )
+				Object.assign( this, { componentType: 'injectable', resolve: this.inject } );
+			else
+				Object.assign( this, { componentType: 'instance', resolved: this.required, resolve: this.resolveResolved } );
 		}
 		if( name )
-			log.trace( `created component (${componentType})`, this.displayName );
+			log.trace( `created component (${this.componentType})`, this.displayName );
 	}
 	getDependencyResolve( name ) {
 		return this.container.has( name ) ? this.container.get( name ).resolve() :
 			this.parent ? this.parent.getDependencyResolve( name ) : undefined;
 	}
 	findDependencyResolve( parentName, name, containers = [] ) {
-		return name === 'log' ? logEmitter( parentName ) : ( foundContainer => foundContainer ?
+		return name === 'log' ? logEmitter.log( parentName ) : ( foundContainer => foundContainer ?
 			foundContainer.get( name ).resolve() :
 			this.getDependencyResolve( name ) || Promise.reject( `"${name}" is not registered` ) )(
 				[ ...containers, ...this.containers ].find( container => container.has( name ) ) );
