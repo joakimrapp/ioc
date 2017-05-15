@@ -4,5 +4,5 @@ require( '../../../helpers/unit.js' )( ( index ) => ( {
 } ) )
 	.it( '', ( assert, index, { ioc } ) => new Promise( resolve =>
 		ioc.scan( '../../../assets' ).
-	 		inject( ( test2 ) => assert( test2, 3 ) ) ) )
+	 		inject( ( module2 ) => assert( module2, 3 ) ) ) )
 .done();
