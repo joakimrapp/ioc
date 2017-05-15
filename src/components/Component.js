@@ -6,7 +6,7 @@ class Component {
 		this.context.getDependency = this.getDependency;
 		if( context.name ) {
 			container.set( context.name, this );
-			this.context.display = this.context.parent ? `${this.context.display}.${this.context.name}` : this.context.name;
+			this.context.display = this.context.parent ? `${this.context.parent.display}.${this.context.name}` : this.context.name;
 			log.trace( 'creating component', () => `${this.display} (${this.lifestyle}, ${this.type})` );
 		}
 		else {
