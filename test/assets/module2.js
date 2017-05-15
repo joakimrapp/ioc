@@ -1,1 +1,1 @@
-module.exports = ( module1 ) => module1 + 2;
+module.exports = ( module1, module3 ) => module1 + module3.module1 + module3.module4;

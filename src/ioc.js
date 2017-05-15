@@ -1,8 +1,13 @@
 const component = require( './component.js' );
 const requirer = require( './requirer.js' );
+const injector = require( './injector.js' );
 class IoC {
 	constructor( scanner ) {
-		Object.assign( this, { container: new Map(), scanner, defaultCatch: ( err ) => console.log( err ) || process.exit(), jobs: [] } );
+		Object.assign( this, { container: new Map(), scanner, _defaultCatch: ( err ) => console.trace( err ) || process.exit(), jobs: [] } );
+	}
+	get defaultCatch() {
+		const ioc = this;
+		return ( err ) => ioc._defaultCatch( err );
 	}
 	scan( relativepath = '.' ) {
 		const callerpath = require( 'stack-trace' ).get()[ 1 ].getFileName();
@@ -13,7 +18,11 @@ class IoC {
 		return this;
 	}
 	get register() {
-		return new Proxy( this, { get: ( target, name, proxy ) => ( required ) => {
+		return new Proxy( this, { get: ( target, name, proxy ) => name === 'transient' ?
+		 	new Proxy( target, { get: ( target, name, proxy ) => ( required ) => {
+				component( target.container, undefined, requirer( { name, required, lifestyle: 'transient' } ) );
+				return target;
+			} } ) : ( required ) => {
 			component( target.container, undefined, requirer( { name, required } ) );
 			return target;
 		}	} );
@@ -29,28 +38,30 @@ class IoC {
 		} );
 	}
 	inject( required ) {
-		const container = this.container;
+		const { container, jobs } = this;
+		if( jobs.length ) {
+			const waiting = this.waiting = [];
+			this.jobs = [];
+			process.nextTick( () => Promise.all( jobs )
+		 		.then( () => {
+					while( waiting.length )
+						waiting.pop().resolve();
+					this.waiting = undefined;
+				} )
+				.catch( this.defaultCatch ) );
+		}
 		if( this.waiting ) {
 			const waiting = this.waiting;
-			new Promise( ( resolve, reject ) => waiting.push( { resolve, reject } ) ).then( () =>
-				component( container, undefined, requirer( { required } ) ).resolve().catch( this.defaultCatch ) ).catch( this.defaultCatch );
-		}
-		else if( this.jobs.length ) {
-			const waiting = this.waiting = [];
-			Promise.all( this.jobs ).then( () => {
-				component( container, undefined, requirer( { required } ) ).resolve().catch( this.defaultCatch );
-				while( waiting.length )
-					waiting.pop().resolve();
-				this.waiting = undefined;
-			} ).catch( this.defaultCatch );
-			this.jobs = [];
+			new Promise( ( resolve, reject ) => waiting.push( { resolve, reject } ) )
+				.then( () => injector( container, required ) )
+				.catch( this.defaultCatch );
 		}
 		else
-			component( container, undefined, requirer( { required } ) ).resolve().catch( this.defaultCatch );
+			injector( container, required ).catch( this.defaultCatch );
 		return this;
 	}
 	catch( onRejected ) {
-		this.defaultCatch = onRejected;
+		this._defaultCatch = onRejected;
 	}
 };
 module.exports = ( scanner ) => new IoC( scanner );

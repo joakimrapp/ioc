@@ -1,17 +1,9 @@
-module.exports = ( Component ) => class InjectableSingleton {
+module.exports = ( Component, log ) => class InjectableTransientParent extends require( './InjectableTransient.js' )( Component, log ) {
 	constructor( container, parent, context, basepath ) {
 		super( container, parent, context, basepath );
-
-
-
-
+		this.context.privateContainer = new Map();
+		context.children.forEach( child => Component.create( this.context.privateContainer, this, child, basepath ) );
 	}
-	get lifestyle() { return 'transient'; }
 	get type() { return 'injectable parent'; }
-	resolveDependencies() {
-
-	}
-	resolve() {
-
-	}
+	getDependency( dependencyName ) { return this.context.privateContainer.get( dependencyName ) || super.getDependency( dependencyName ); }
 };

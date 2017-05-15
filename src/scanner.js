@@ -14,7 +14,7 @@ const recursiveScan = ( callerpath, relativepath, absolutepath = path.resolve( p
 		      const parent = child.isParent ? undefined : children.find( ( { name, isParent } ) => isParent && ( name === child.name ) );
 		      if( parent ) {
 						if( child.relativepath ) {
-							if( child.isJson )
+							if( child.json )
 			          child.name = 'json';
 			        parent.children.push( child );
 						}
@@ -31,7 +31,7 @@ const recursiveScan = ( callerpath, relativepath, absolutepath = path.resolve( p
 			if( config.ignore[ lifestyle ] )
 				return [];
 			else if( config.jsonfile[ extname ] )
-				return [ { name: path.basename( basename, lifestyle ), relativepath, absolutepath } ];
+				return [ { name: path.basename( basename, lifestyle ), relativepath, absolutepath, json: true } ];
 			else if( config.codefile[ extname ] )
 				return [ { name: path.basename( basename, lifestyle ), relativepath, lifestyle: config.lifestyle[ lifestyle ], isParent: true, children: [], absolutepath } ];
 			else
