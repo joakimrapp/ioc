@@ -17,7 +17,7 @@ module.exports = ( Component, log ) => class InjectableTransient extends Compone
 			.then( resolvedDependencies => log
 				.trace( 'injecting', () => this.display )
 				.timer( Promise.resolve( this.required( ...resolvedDependencies ) ) )
-				.debug( 'resolved', () => this.display ).promise )
+				.debug( 'resolved', () => `${this.display} for ${moduleName}` ).promise )
 			.catch( err => {
 				log.error( 'resolve failed', err );
 				return Promise.reject( `"${this.display}" -> ${err}` );
