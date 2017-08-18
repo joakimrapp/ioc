@@ -20,23 +20,17 @@ class IoC {
 		return this;
 	}
 	get register() {
-		return new Proxy( this, { get: ( target, name, proxy ) => name === 'transient' ?
-		 	new Proxy( target, { get: ( target, name, proxy ) => ( required ) => {
-				component( target.container, undefined, requirer( { name, required, lifestyle: 'transient' } ) );
-				return target;
-			} } ) : ( required ) => {
-			component( target.container, undefined, requirer( { name, required } ) );
-			return target;
-		}	} );
+		return new Proxy( this, { get: ( target, name, proxy ) =>
+			name === 'transient' ? new Proxy( target, { get: ( target, name, proxy ) => ( required ) => (
+				component( target.container, undefined, requirer( { name, required, lifestyle: 'transient' } ) ), target ) } ) :
+			( required ) => ( component( target.container, undefined, requirer( { name, required } ) ), target ) } );
 	}
 	get set() {
-		const ioc = this;
-		return new Proxy( sets => ( () => ioc )( Object.keys( sets ).forEach( name => component( ioc.container, undefined, { name, resolved: sets[ name ] } ) ) ), {
-			get: ( target, name, proxy ) => resolved => {
-				component( ioc.container, undefined, { name, resolved } );
-				return ioc;
-			},
-			apply: ( target, name, argumentList, proxy ) => target( ...argumentList )
+		return new Proxy( Object.assign( () => {}, { ioc: this } ), {
+			get: ( { ioc }, name, proxy ) => ( ...args ) =>
+				( component( ioc.container, undefined, { name, resolved: args.length ? args[ 0 ] : require( './index.js' ) } ), ioc ),
+			apply: ( { ioc }, name, [ sets ] ) =>
+				( Object.keys( sets ).forEach( name => ioc.set[ name ]( sets[ name ] ) ), ioc )
 		} );
 	}
 	promise( required ) {
@@ -60,11 +54,7 @@ class IoC {
 		else
 			return injector( container, required );
 	}
-	inject( required ) {
-		return ( this.promise( required ).catch( this.defaultCatch ), this );
-	}
-	catch( onRejected ) {
-		this._defaultCatch = onRejected;
-	}
+	inject( required ) { return ( this.promise( required ).catch( this.defaultCatch ), this ); }
+	catch( onRejected ) { return ( ( this._defaultCatch = onRejected ), this ); }
 };
 module.exports = ( scanner ) => new IoC( scanner );
