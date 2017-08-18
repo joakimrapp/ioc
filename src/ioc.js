@@ -39,7 +39,7 @@ class IoC {
 			apply: ( target, name, argumentList, proxy ) => target( ...argumentList )
 		} );
 	}
-	inject( required ) {
+	promise( required ) {
 		const { container, jobs } = this;
 		if( jobs.length ) {
 			const waiting = this.waiting = [];
@@ -54,13 +54,14 @@ class IoC {
 		}
 		if( this.waiting ) {
 			const waiting = this.waiting;
-			new Promise( ( resolve, reject ) => waiting.push( { resolve, reject } ) )
-				.then( () => injector( container, required ) )
-				.catch( this.defaultCatch );
+			return new Promise( ( resolve, reject ) => waiting.push( { resolve, reject } ) )
+				.then( () => injector( container, required ) );
 		}
 		else
-			injector( container, required ).catch( this.defaultCatch );
-		return this;
+			return injector( container, required );
+	}
+	inject( required ) {
+		return ( this.promise( required ).catch( this.defaultCatch ), this );
 	}
 	catch( onRejected ) {
 		this._defaultCatch = onRejected;
