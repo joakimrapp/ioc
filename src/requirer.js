@@ -5,7 +5,7 @@ module.exports = ( { name, relativepath, children, lifestyle, absolutepath, requ
 	if( required === undefined )
 		throw new Error( `cannot register ${name}. When requiering ${absolutepath} it returns undefined` );
 	return required instanceof Function ?
-		Object.defineProperty( { name, relativepath, children, lifestyle, dependencies: dependencies( required ) },
+		Object.defineProperty( { name, relativepath, children, lifestyle, dependencies: dependencies( required ).args },
 			'required', { value: required } ) :
 		Object.defineProperty( { name, relativepath, children },
 			'resolved', { value: required } );

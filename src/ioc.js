@@ -1,10 +1,12 @@
 const component = require( './component.js' );
+const dependencies = require( './dependencies.js' );
 const requirer = require( './requirer.js' );
 const injector = require( './injector.js' );
 class IoC {
 	constructor( scanner ) {
 		Object.assign( this, { container: new Map(), scanner, _defaultCatch: ( err ) => console.trace( err ) || process.exit(), jobs: [] } );
 	}
+	parse( ...args ) { return dependencies( ...args ); }
 	get defaultCatch() {
 		const ioc = this;
 		return ( err ) => ioc._defaultCatch( err );
